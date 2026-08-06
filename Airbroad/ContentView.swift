@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Airbroad
-//
-//  Created by Vino Arsena Loanda on 06/08/26.
-//
-
 import SwiftUI
 import SwiftData
 
