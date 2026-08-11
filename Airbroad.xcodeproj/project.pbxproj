@@ -35,16 +35,6 @@
 			path = Airbroad;
 			sourceTree = "<group>";
 		};
-		B8BC7FD0302419D70016DFDE /* AirbroadTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AirbroadTests;
-			sourceTree = "<group>";
-		};
-		B8BC7FDA302419D70016DFDE /* AirbroadUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AirbroadUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,8 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				B8BC7FC0302419D70016DFDE /* Airbroad */,
-				B8BC7FD0302419D70016DFDE /* AirbroadTests */,
-				B8BC7FDA302419D70016DFDE /* AirbroadUITests */,
 				B8BC7FBF302419D70016DFDE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +118,6 @@
 			dependencies = (
 				B8BC7FCF302419D70016DFDE /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				B8BC7FD0302419D70016DFDE /* AirbroadTests */,
-			);
 			name = AirbroadTests;
 			packageProductDependencies = (
 			);
@@ -152,9 +137,6 @@
 			);
 			dependencies = (
 				B8BC7FD9302419D70016DFDE /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				B8BC7FDA302419D70016DFDE /* AirbroadUITests */,
 			);
 			name = AirbroadUITests;
 			packageProductDependencies = (
