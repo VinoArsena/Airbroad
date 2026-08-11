@@ -4,7 +4,7 @@ import MapKit
 struct SearchView: View {
     @Bindable var viewModel = SearchViewModel()
     
-    @State var currentPresentationDetents: PresentationDetent = .fraction(0.1)
+    @State var currentPresentationDetents: PresentationDetent = .fraction(0.3)
     
     @State private var position: MapCameraPosition = .region(
         MKCoordinateRegion(
@@ -19,7 +19,8 @@ struct SearchView: View {
         }
         .sheet(isPresented: $viewModel.showBottomPanel) {
             BottomPanelSheetView(viewModel: viewModel, currentPresentationDetents: $currentPresentationDetents)
-                .presentationDetents([.fraction(0.3), .fraction(0.75)], selection: $currentPresentationDetents)
+                .presentationDetents([.fraction(0.3), .large], selection: $currentPresentationDetents)
+                .interactiveDismissDisabled()
         }
     }
 }
