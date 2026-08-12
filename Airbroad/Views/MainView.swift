@@ -3,6 +3,9 @@ import MapKit
 
 struct MainView: View {
     @StateObject private var viewModel = MainViewModel()
+    @State private var showingDatePicker = false
+    @State private var selectedStartDate: Date?
+    @State private var selectedEndDate: Date?
 
     var body: some View {
         NavigationStack {
@@ -31,6 +34,7 @@ struct MainView: View {
 
                 VStack {
                     searchBar
+                    dateFilterBar
                     if let error = viewModel.errorMessage {
                         Text(error)
                             .font(.footnote)
@@ -48,6 +52,14 @@ struct MainView: View {
             }
             .navigationTitle("Air Quality Map")
             .navigationBarTitleDisplayMode(.inline)
+        }
+        .sheet(isPresented: $showingDatePicker) {
+            EventDateRangePicker { start, end in
+                selectedStartDate = start
+                selectedEndDate = end
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
@@ -67,9 +79,37 @@ struct MainView: View {
         }
         .padding(10)
         .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .clipShape(RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal)
         .padding(.top, 8)
+    }
+
+    private var dateFilterBar: some View {
+        Button {
+            showingDatePicker = true
+        } label: {
+            HStack {
+                Image(systemName: "calendar")
+                Text(dateRangeLabel)
+                Spacer()
+                Image(systemName: "chevron.down")
+                    .font(.caption)
+            }
+            .foregroundStyle(.primary)
+            .padding(10)
+            .background(.regularMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 24))
+        }
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+
+    private var dateRangeLabel: String {
+        guard let start = selectedStartDate else { return "Select move-in dates" }
+        guard let end = selectedEndDate else {
+            return start.formatted(.dateTime.month().day())
+        }
+        return "\(start.formatted(.dateTime.month().day())) – \(end.formatted(.dateTime.month().day()))"
     }
 
     private func zoneCard(_ zone: AQIZone) -> some View {
@@ -88,7 +128,6 @@ struct MainView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
-            // Next two steps in your flow chart hang off this.
             NavigationLink("View accommodation & forecast") {
                 Text("Accommodation list for \(zone.name) — TODO")
             }
