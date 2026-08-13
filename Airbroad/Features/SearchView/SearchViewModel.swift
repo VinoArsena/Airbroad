@@ -20,7 +20,6 @@ final class SearchViewModel: NSObject, MKLocalSearchCompleterDelegate {
         String(format: "%02.0f.00", sliderTime)
     }
     
-    
     private let completer = MKLocalSearchCompleter()
 
     

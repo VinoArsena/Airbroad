@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import Foundation
 
 @Observable
 class ResultViewModel {
