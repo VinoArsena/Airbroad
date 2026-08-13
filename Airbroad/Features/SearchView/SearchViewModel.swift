@@ -6,18 +6,25 @@ import Observation
 @MainActor
 @Observable
 final class SearchViewModel: NSObject, MKLocalSearchCompleterDelegate {
-    var searchLocationText = ""
-    var showBottomPanel: Bool = true
-    
-    var startDatePicked = Date()
-    var endDatePicked = Date()
+    var showSearchBar: Bool = false
     
     var locationSearch: String = ""
+    var datePicked = Date()
     var locationSearchResults: [MKLocalSearchCompletion] = []
     var selectedDestination: NavigationDestination?
     
-    private let completer = MKLocalSearchCompleter()
+    var isEditing = false
     
+    var sliderTime: Double = Double(Calendar.current.component(.hour, from: Date()))
+    var currentTime: String {
+        String(format: "%02.0f.00", sliderTime)
+    }
+    
+    
+    private let completer = MKLocalSearchCompleter()
+
+    
+    /// Search Completer
     override init() {
         super.init()
         initSearchCompleter()
@@ -82,6 +89,7 @@ final class SearchViewModel: NSObject, MKLocalSearchCompleterDelegate {
     func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
         locationSearchResults = []
     }
+
 }
 
 
