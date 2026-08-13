@@ -4,7 +4,7 @@ import MapKit
 
 struct LocationSuggestionView: View {
     @Bindable var viewModel: SearchViewModel
-    @Binding var currentPresentationDetents: PresentationDetent
+//    @Binding var currentPresentationDetents: PresentationDetent
     @FocusState.Binding var textFieldClicked: Bool
     @State private var distanceText: String = ""
     
@@ -57,8 +57,7 @@ struct LocationSuggestionView: View {
         
         Task {
             await viewModel.selectCompletion(result)
-            
-            currentPresentationDetents = .fraction(0.3)
+            viewModel.showSearchBar = false
         }
     }
 }
