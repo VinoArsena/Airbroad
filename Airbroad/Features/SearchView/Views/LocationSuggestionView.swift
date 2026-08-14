@@ -39,17 +39,17 @@ struct LocationSuggestionView: View {
                     }
                 }
     
-                Divider()
-                    .padding(.top, 10)
+//                Divider()
+//                    .padding(.top, 10)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
-            .background(Color(.systemGray6))
+            .padding(.vertical, 10)
+            .padding(.horizontal, 40)
+            .background(Color(.secondarySystemGroupedBackground))
         }
         .buttonStyle(.plain)
         .cornerRadius(20)
-        .padding(.bottom, 4)
+        
     }
     
     private func selectDestination() {

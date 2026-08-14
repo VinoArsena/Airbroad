@@ -1,15 +1,9 @@
-//
-//  ResultView.swift
-//  Airbroad
-//
-//  Created by Elena Nathanielle on 13/08/26.
-//
 
 import SwiftUI
 import Charts
 
 struct ResultView: View {
-    @State private var viewModel = ResultViewModel()
+    @Bindable var viewModel: ResultViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -32,14 +26,12 @@ struct ResultView: View {
                     Button {
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary, Color(.tertiarySystemFill))
+                        Image(systemName: "xmark")
+//                            .foregroundStyle(.secondary)
                             .font(.title2)
                     }
+                    .buttonStyle(.plain)
                 }
-            }
-            .task {
-                await viewModel.loadForecast()
             }
             .overlay {
                 if viewModel.isLoading && viewModel.days.isEmpty {
@@ -134,7 +126,7 @@ struct ResultView: View {
                 .opacity(0.15)
             }
             
-            if let currentIndex = points.indices.contains(viewModel.currentHourIndex) ? viewModel.currentHourIndex : nil,
+            if let currentIndex = points.indices.contains(viewModel.selectedHourIndex) ? viewModel.selectedHourIndex : nil,
                let currentValue = viewModel.chartValues[safe: currentIndex] {
                 PointMark(
                     x: .value("Hour", currentIndex),
@@ -334,8 +326,4 @@ private extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil
     }
-}
-
-#Preview {
-    ResultView()
 }
