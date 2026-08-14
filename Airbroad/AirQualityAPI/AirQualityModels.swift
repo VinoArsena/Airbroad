@@ -1,43 +1,59 @@
 
 import Foundation
 
-struct AirQualityDay: Codable, Identifiable {
-    let id: String
-    let date: Date
-
-    let hourlyAQI: [Double]
-    let hourlyPM25: [Double]
-    let hourlyPM10: [Double]
-    let hourlyO3: [Double]
-
-    let minAQI: Double
-    let maxAQI: Double
+struct PollutantResponse: Codable {
+    let hourly: PollutantHourly
 }
 
-struct OpenMeteoResponse: Codable {
-    let hourly: HourlyData
+struct WeatherResponse: Codable {
+    let hourly: WeatherHourly
 }
 
-struct HourlyData: Codable {
+struct PollutantHourly: Codable {
     let time: [String]
-
     let us_aqi: [Double?]
     let pm2_5: [Double?]
     let pm10: [Double?]
-    let carbon_monoxide: [Double?]?
-    let nitrogen_dioxide: [Double?]?
+    let carbon_monoxide: [Double?]
+    let nitrogen_dioxide: [Double?]
     let ozone: [Double?]
 }
 
+struct WeatherHourly: Codable {
+    let time: [String]
+    let temperature_2m: [Double?]
+    let relative_humidity_2m: [Double?]
+    let wind_speed_10m: [Double?]
+    let rain: [Double?]
+}
+
+struct AirQualityDay: Identifiable {
+    let id: String
+    let date: Date
+    
+    let hourlyAQI: [Double]
+    let hourlyPM25: [Double]
+    let hourlyPM10: [Double]
+    let hourlyCO: [Double]
+    let hourlyNO2: [Double]
+    let hourlyO3: [Double]
+    let minAQI: Double
+    let maxAQI: Double
+    
+    let hourlyTemperature: [Double]
+    let hourlyHumidity: [Double]
+    let hourlyWindSpeed: [Double]
+    let hourlyRain: [Double]
+}
 
 enum PollutantType: String, CaseIterable, Identifiable {
     case aqi
     case pm25
     case pm10
     case o3
-
+    
     var id: String { rawValue }
-
+    
     var tabTitle: String {
         switch self {
         case .aqi:  return "AQI"
@@ -46,15 +62,14 @@ enum PollutantType: String, CaseIterable, Identifiable {
         case .o3:   return "O3"
         }
     }
-
+    
     var unit: String {
         switch self {
         case .aqi:  return ""
         case .pm25, .pm10, .o3: return "µg/m³"
         }
     }
-
-    // ini define sndiri lagi ntar
+    
     func category(for value: Double) -> AQICategory {
         switch self {
         case .aqi:
@@ -87,15 +102,13 @@ enum PollutantType: String, CaseIterable, Identifiable {
     }
 }
 
-
-// idk ini perlu/ga
 enum AQICategory: String, CaseIterable {
     case low = "Low"
     case moderate = "Moderate"
     case high = "High"
     case veryHigh = "Very High"
     case extreme = "Extreme"
-
+    
     static func forAQI(_ value: Double) -> AQICategory {
         switch value {
         case ..<51:   return .low
@@ -105,8 +118,8 @@ enum AQICategory: String, CaseIterable {
         default:      return .extreme
         }
     }
-
-
+    
+    
     var recommendsStayingIndoors: Bool {
         switch self {
         case .low, .moderate: return false
