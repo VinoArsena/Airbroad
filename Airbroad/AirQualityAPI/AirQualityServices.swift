@@ -1,9 +1,3 @@
-//
-//  AirQualityService.swift
-//  Airbroad
-//
-//  Created by Elena Nathanielle on 13/08/26.
-//
 
 import Foundation
 
@@ -23,20 +17,17 @@ enum AirQualityServiceError: LocalizedError {
     }
 }
 
-
 struct AirQualityService {
+    
+    var latitude = 1.3573
+    var longitude = 103.94
 
     private let baseURL = "https://air-quality-api.open-meteo.com/v1/air-quality"
-
-    // ini location nya ntar based on user input kan ya?
-    private let latitude = 1.3573
-    private let longitude = 103.94
-
     private let timeZoneIdentifier = "Asia/Singapore"
 
     
-    func fetchForecast(startDate: Date, endDate: Date) async throws -> [AirQualityDay] {
-        guard let url = buildURL(startDate: startDate, endDate: endDate) else {
+    func fetchForecast(startDate: Date, endDate: Date, lat: Double, lon: Double) async throws -> [AirQualityDay] {
+        guard let url = buildURL(startDate: startDate, endDate: endDate, lat: lat, lon: lon) else {
             throw AirQualityServiceError.invalidURL
         }
 
@@ -57,7 +48,7 @@ struct AirQualityService {
         return Self.groupByDay(decoded.hourly, timeZoneIdentifier: timeZoneIdentifier)
     }
 
-    private func buildURL(startDate: Date, endDate: Date) -> URL? {
+    private func buildURL(startDate: Date, endDate: Date, lat: Double, lon: Double) -> URL? {
         var components = URLComponents(string: baseURL)
 
         let dateFormatter = DateFormatter()
@@ -66,8 +57,8 @@ struct AirQualityService {
         dateFormatter.timeZone = TimeZone(identifier: timeZoneIdentifier)
 
         components?.queryItems = [
-            URLQueryItem(name: "latitude", value: String(latitude)),
-            URLQueryItem(name: "longitude", value: String(longitude)),
+            URLQueryItem(name: "latitude", value: String(lat)),
+            URLQueryItem(name: "longitude", value: String(lon)),
             URLQueryItem(name: "start_date", value: dateFormatter.string(from: startDate)),
             URLQueryItem(name: "end_date", value: dateFormatter.string(from: endDate)),
             URLQueryItem(name: "hourly", value: "us_aqi,pm2_5,pm10,carbon_monoxide,nitrogen_dioxide,ozone"),

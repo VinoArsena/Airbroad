@@ -1,9 +1,3 @@
-//
-//  AirQualityModels.swift
-//  Airbroad
-//
-//  Created by Elena Nathanielle on 13/08/26.
-//
 
 import Foundation
 

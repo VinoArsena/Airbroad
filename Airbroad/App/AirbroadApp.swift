@@ -5,7 +5,7 @@ import SwiftData
 struct AirbroadApp: App {
     var body: some Scene {
         WindowGroup {
-            ResultView()
+            ContentView()
         }
     }
 }
