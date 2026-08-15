@@ -2,19 +2,19 @@ import SwiftUI
 
 struct SearchBarView: View {
     @Bindable var viewModel: SearchViewModel
-    
+
     @FocusState private var textFieldClicked: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .padding(.trailing, 5)
-                
+
                 TextField("Where", text: $viewModel.locationSearch).focused($textFieldClicked)
                     .onChange(of: viewModel.locationSearch) { _, newQuery in
                         let isSelectedTitle = viewModel.selectedDestination?.title == newQuery
-                        
+
                         if textFieldClicked && !newQuery.isEmpty && !isSelectedTitle {
                             viewModel.searchLocation(query: newQuery)
                         }
@@ -25,7 +25,7 @@ struct SearchBarView: View {
             .padding(.horizontal, 15)
             .padding(.top, 15)
             .padding(.bottom, viewModel.locationSearch == "" ? 15 : 5)
-            
+
             if viewModel.locationSearch != "" {
                 VStack(spacing: 0) {
                     ForEach(viewModel.locationSearchResults.prefix(3), id: \.self) { result in
@@ -37,7 +37,6 @@ struct SearchBarView: View {
                         .padding(.horizontal)
                         .padding(.bottom, 5)
                     }
-                    
                 }
                 .padding(.bottom, 5)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -45,6 +44,12 @@ struct SearchBarView: View {
         }
         .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
         .padding(.horizontal, 15)
+        .onAppear {
+            Task {
+                try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                textFieldClicked = true
+            }
+        }
     }
 }
 
