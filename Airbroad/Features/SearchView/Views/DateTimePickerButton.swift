@@ -18,13 +18,18 @@ struct DateTimePickerButton: View {
 
     var body: some View {
         Button {
-            viewModel.activePicker = .date
-            viewModel.showCalendar = true
+            if (viewModel.showCalendar == true) {
+                viewModel.showCalendar = false
+                viewModel.activePicker = .none
+            } else {
+                viewModel.showCalendar = true
+                viewModel.activePicker = .date
+            }
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "calendar")
-                Text(displayLabel).font(.headline)
-                Image(systemName: viewModel.activePicker == .date ? "chevron.up" : "chevron.down")
+//                Text(displayLabel).font(.headline)
+//                Image(systemName: viewModel.activePicker == .date ? "chevron.up" : "chevron.down")
             }
             .padding(.horizontal, 14)
             .frame(height: 44)

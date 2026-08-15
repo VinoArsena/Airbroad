@@ -16,8 +16,13 @@ struct LocationSearchButton: View {
     /// <#Description#>
     var body: some View {
         Button {
-            viewModel.activePicker = .location
-            viewModel.showSearchBar = true
+            if (viewModel.showSearchBar == true) {
+                viewModel.showSearchBar = false
+                viewModel.activePicker = .none
+            } else {
+                viewModel.showSearchBar = true
+                viewModel.activePicker = .location
+            }
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "location.fill")
