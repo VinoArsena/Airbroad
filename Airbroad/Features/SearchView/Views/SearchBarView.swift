@@ -22,7 +22,9 @@ struct SearchBarView: View {
             }
             .padding(10)
             .glassEffect(.regular.tint(Color(.secondarySystemGroupedBackground)))
-            .padding(15)
+            .padding(.horizontal, 15)
+            .padding(.top, 15)
+            .padding(.bottom, viewModel.locationSearch == "" ? 15 : 5)
             
             if viewModel.locationSearch != "" {
                 VStack(spacing: 0) {
@@ -32,15 +34,16 @@ struct SearchBarView: View {
                             textFieldClicked: $textFieldClicked,
                             result: result
                         )
+                        .padding(.horizontal)
+                        .padding(.bottom, 5)
                     }
                     
                 }
+                .padding(.bottom, 5)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
-        
-        //        .background()
         .padding(.horizontal, 15)
     }
 }

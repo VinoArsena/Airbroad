@@ -3,105 +3,96 @@ import MapKit
 
 struct SearchView: View {
     @Bindable var viewModel = SearchViewModel()
+    @Bindable var resViewModel = ResultViewModel()
     
-    @State var currentPresentationDetents: PresentationDetent = .fraction(0.3)
-    
-    @State private var position: MapCameraPosition = .region(
-        MKCoordinateRegion(
-            center: CLLocationCoordinate2D(latitude: 1.3048, longitude: 103.8318),
-            span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-        )
-    )
+    @State private var showDetailedPollutantSheet = false
     
     var body: some View {
         ZStack (alignment: .top){
-            Color(.systemBackground)
+            //            Color(.systemBackground)
+            
+            Image("background")
                 .ignoresSafeArea()
             
             VStack {
                 HStack {
-                    Button(action: {viewModel.showSearchBar = true}) {
-                        Image(systemName: "location.fill")
-                            .font(.title3)
-                        
-                        if (viewModel.locationSearchResults == [] || viewModel.selectedDestination == nil) {
-                            Text("Where")
-                                .foregroundStyle(Color(.systemGray))
-                                .font(.headline)
-                        } else {
-                            Text("\(viewModel.locationSearch)")
-                            .font(.headline)
-                        }
-                        
-                        Image(systemName: "chevron.down")
-                            .font(.title3)
-                    }
-                    
-                    Divider()
-                        .frame(height: 20)
-                        .padding(.horizontal, 10)
-                    
-                    Button(action: {}) {
-                        Image(systemName: "calendar")
-                        
-                        Text("When")
-                            .foregroundStyle(Color(.systemGray))
-                            .font(.headline)
-                        
-                        Image(systemName: "chevron.down")
-                    }
-                    
+                    LocationSearchButton(viewModel: viewModel)
+                    DateTimePickerButton(viewModel: viewModel)
                 }
                 .buttonStyle(.plain)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-                .glassEffect(.regular.tint(Color(.systemGroupedBackground)))
                 
-                SearchBarView(viewModel: viewModel)
-                    .padding(.top, 10)
-                    .opacity(viewModel.showSearchBar ? 1 : 0)
+                if viewModel.showSearchBar {
+                    SearchBarView(viewModel: viewModel)
+                        .padding(.top, 10)
+                }
+                
+                if viewModel.showCalendar {
+                    WeekDayStrip(viewModel: viewModel)
+                        .padding(.top, 10)
+                }
+                
+                if !viewModel.showSearchBar && !viewModel.showCalendar && !resViewModel.isLoading {
+                    if let current = resViewModel.currentHourData,
+                       let level = resViewModel.currentRiskLevel {
+                        Button(action: { showDetailedPollutantSheet = true }) {
+                            RecommendationCardView(
+                                isLoading: resViewModel.isLoading,
+                                current: current,
+                                level: level,
+                                nextBetterTime: resViewModel.nextBetterTime
+                            )
+                            .padding(.top, 16)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
                 
                 Spacer()
                 
                 VStack (alignment: .leading) {
+                    let date = Calendar.current.isDateInToday(viewModel.pickedDate)
+                    ? "Today"
+                    : viewModel.pickedDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
                     
-                    HStack {
+                    HStack (alignment: .top){
                         VStack (alignment: .leading) {
                             Text(viewModel.selectedDestination?.title ?? "Singapore")
                                 .font(.title)
                                 .fontWeight(.bold)
-                            Text("Today")
+                            Text(date)
                                 .font(.body)
                                 .foregroundStyle(Color(.systemGray))
                         }
                         
                         Spacer()
                         
-                        Text(  viewModel.currentTime).font(.title)
-                            .fontWeight(.bold)
+                        VStack (alignment: .trailing, spacing: 6){
+                            Text(  viewModel.currentTime12Hour).font(.title)
+                                .fontWeight(.bold)
+                            SunMoonToggle(isPM: $viewModel.isPM)
+                        }
+                        
                     }
                     
                     Slider(
-                        value: $viewModel.sliderTime,
-                        in: 0...23,
+                        value: $viewModel.sliderHour12,
+                        in: 0...11,
                         step: 1,
                         label: { Text("Time") },
                         tick: { value in
                             SliderTick(value) {
-                                if Int(value) == Calendar.current.component(.hour, from: Date()) {
-                                    Text("Now")
-                                        .font(.caption2)
-                                        .fontWeight(.semibold)
-                                } else if Int(value) % 2 == 1 {
-                                    Text(String(format: "%02d", Int(value)))
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
+                                let displayed = Int(value) == 0 ? 12 : Int(value)
+                                let realHour24 = Calendar.current.component(.hour, from: Date())
+                                let realHour12 = realHour24 % 12
+                                let realIsPM = realHour24 >= 12
+                                if Int(value) == realHour12 && viewModel.isPM == realIsPM {
+                                    Text("Now").font(.caption2).fontWeight(.semibold)
+                                } else {
+                                    Text("\(displayed)").font(.caption2).foregroundStyle(.secondary)
                                 }
                             }
                         },
-                        onEditingChanged: { editing in
-                            viewModel.isEditing = editing
-                        }
+                        onEditingChanged: { editing in viewModel.isEditing = editing }
                     )
                 }
                 .padding(20)
@@ -109,11 +100,31 @@ struct SearchView: View {
                 
                 
             }
-            
-            .padding(.horizontal, 20)
-            
-            
+            .padding(20)
+            .padding(.top, 30)
+            .padding(.bottom, 20)
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .sheet(isPresented: $showDetailedPollutantSheet) {
+            ResultView(viewModel: resViewModel)
+        }
+        .onChange(of: viewModel.actualHour24) { _, newHour in
+            resViewModel.selectedHourIndex = newHour
+        }
+        .task(id: viewModel.pickedDate) {
+            resViewModel.select(date: viewModel.pickedDate)
+        }
+        .task {
+            await resViewModel.loadInitialLocation()
+        }
+        .task(id: viewModel.selectedDestination?.id) {
+            guard let destination = viewModel.selectedDestination else { return }
+            await resViewModel.loadForecast(
+                lat: destination.coordinate.latitude,
+                lon: destination.coordinate.longitude
+            )
+        }
+        
     }
 }
 
