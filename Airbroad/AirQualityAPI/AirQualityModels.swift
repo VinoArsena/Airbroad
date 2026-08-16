@@ -1,6 +1,14 @@
 
 import Foundation
 
+extension Calendar {
+    static let singapore: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Singapore") ?? .current
+        return calendar
+    }()
+}
+
 struct PollutantResponse: Codable {
     let hourly: PollutantHourly
 }

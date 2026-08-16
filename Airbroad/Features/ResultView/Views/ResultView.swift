@@ -1,9 +1,8 @@
-
 import SwiftUI
 import Charts
 
 struct ResultView: View {
-    @Bindable var viewModel: ResultViewModel
+    @Bindable var viewModel = ResultViewModel()
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -43,6 +42,7 @@ struct ResultView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
+            .navigationBarBackButtonHidden(true)
         }
     }
     
@@ -59,7 +59,7 @@ struct ResultView: View {
             ForEach(viewModel.availableDates, id: \.self) { date in
                 DateChip(
                     date: date,
-                    isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate)
+                    isSelected: Calendar.singapore.isDate(date, inSameDayAs: viewModel.selectedDate)
                 ) {
                     withAnimation(.snappy) { viewModel.select(date: date) }
                 }
@@ -280,50 +280,12 @@ struct ResultView: View {
     }
 }
 
-
-private struct DateChip: View {
-    let date: Date
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Text(weekdayLabel)
-                    .font(.callout)
-                    .foregroundStyle(Color(.systemGray))
-                
-                Text(dayLabel)
-                    .font(.title2)
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(isSelected ? .white : .primary)
-                    .fontWeight(isSelected ? .bold : .medium)
-                    .background(
-                        Circle()
-                            .fill(isSelected ? Color(.blue) : Color(.clear))
-                    )
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-        }
-        .buttonStyle(.plain)
-    }
-    
-    private var weekdayLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E"
-        return String(formatter.string(from: date).prefix(1))
-    }
-    
-    private var dayLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter.string(from: date)
-    }
-}
-
 private extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil
     }
+}
+
+#Preview {
+    ResultView()
 }

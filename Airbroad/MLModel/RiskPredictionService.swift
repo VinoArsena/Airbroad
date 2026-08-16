@@ -9,6 +9,10 @@ protocol RiskPredicting {
 struct RiskPrediction {
     let label: String
     let probabilities: [String: Double]
+
+    var riskLevel: RiskLevel? {
+        RiskLevel(mlLabel: label)
+    }
 }
 
 final class CoreMLRiskPredictor: RiskPredicting {

@@ -19,6 +19,9 @@ struct SearchBarView: View {
                             viewModel.searchLocation(query: newQuery)
                         }
                     }
+                    .onAppear {
+                        textFieldClicked = true
+                    }
             }
             .padding(10)
             .glassEffect(.regular.tint(Color(.secondarySystemGroupedBackground)))

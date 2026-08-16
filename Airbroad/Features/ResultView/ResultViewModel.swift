@@ -1,4 +1,3 @@
-
 import Foundation
 import Observation
 
@@ -13,6 +12,7 @@ struct RiskDisplayItem: Identifiable {
     let id = UUID()
     let time: String
     let category: AQICategory
+    let riskLevel: RiskLevel
     let point: PollutantSnapshot
 }
 
@@ -25,6 +25,16 @@ enum RiskLevel: Int, CaseIterable {
         case .moderate: self = .slight
         case .high: self = .moderate
         case .veryHigh, .extreme: self = .high
+        }
+    }
+
+    init?(mlLabel: String) {
+        switch mlLabel {
+        case "Safe": self = .safe
+        case "Slight Risk": self = .slight
+        case "Moderate Risk": self = .moderate
+        case "High Risk": self = .high
+        default: return nil
         }
     }
     
@@ -64,10 +74,14 @@ class ResultViewModel {
     var isLoading = false
     var errorMessage: String?
     
-    init(service: AirQualityService = AirQualityService()) {
+    init(
+        service: AirQualityService = AirQualityService(),
+        riskPredictor: RiskPredicting? = try? CoreMLRiskPredictor()
+    ) {
         self.service = service
+        self.riskPredictor = riskPredictor
         
-        let cal = Calendar.current
+        let cal = Calendar.singapore
         self.calendar = cal
         
         let components = calendar.dateComponents([.year, .month, .day], from: Date())
@@ -124,7 +138,7 @@ class ResultViewModel {
         
         guard startIndex >= 0, startIndex < aqiValues.count else { return [] }
         
-        let hourRange: [Int] = Array(startIndex ..< aqiValues.count)
+        let riskLevels = mlRiskLevels(for: day)
         
         var items: [RiskDisplayItem] = []
         items.reserveCapacity(aqiValues.count)
@@ -134,6 +148,7 @@ class ResultViewModel {
             let item = RiskDisplayItem(
                 time: timeLabel(forHour: hour),
                 category: category,
+                riskLevel: riskLevels[safe: hour] ?? RiskLevel(fromCategory: category),
                 point: PollutantSnapshot(
                     aqi: aqiValues[safe: hour] ?? 0,
                     pm2_5: pm25Values[safe: hour] ?? 0,
@@ -152,8 +167,7 @@ class ResultViewModel {
     }
     
     var currentRiskLevel: RiskLevel? {
-        guard let current = currentHourData else { return nil }
-        return RiskLevel(fromCategory: current.category)
+        currentHourData?.riskLevel
     }
     
     var nextBetterTime: String? {
@@ -164,7 +178,7 @@ class ResultViewModel {
         let upcoming = results[(startIndex + 1)...]   // only look forward from selected hour, not from hour 0
         
         for item in upcoming {
-            if RiskLevel(fromCategory: item.category).rawValue < current.rawValue {
+            if item.riskLevel.rawValue < current.rawValue {
                 return item.time
             }
         }
@@ -185,6 +199,7 @@ class ResultViewModel {
         
         do {
             days = try await service.fetchForecast(startDate: today, endDate: endDate, lat: lat, lon: lon)
+            riskLevelCache.removeAll()
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription
             ?? "Couldn't load air quality data. Pull to refresh and try again."
@@ -204,13 +219,16 @@ class ResultViewModel {
         days.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
     }
     
-    var selectedHourIndex: Int = Calendar.current.component(.hour, from: Date())
+    var selectedHourIndex: Int = Calendar.singapore.component(.hour, from: Date())
     
     private let singaporeLat = 1.35
     private let singaporeLon = 103.82
     
     private let service: AirQualityService
     private let calendar: Calendar
+    private let riskPredictor: RiskPredicting?
+    
+    private var riskLevelCache: [String: [RiskLevel]] = [:]
     
     private let forecastDaysAhead = 3
     
@@ -256,7 +274,38 @@ class ResultViewModel {
         String(format: "%02d:00", hour)
     }
     
-    
+    private func mlRiskLevels(for day: AirQualityDay) -> [RiskLevel] {
+        if let cached = riskLevelCache[day.id] {
+            return cached
+        }
+        
+        let levels = (0..<day.hourlyAQI.count).map { hour -> RiskLevel in
+            let fallbackCategory = PollutantType.aqi.category(for: day.hourlyAQI[safe: hour] ?? 0)
+            let fallback = RiskLevel(fromCategory: fallbackCategory)
+            
+            guard let riskPredictor else { return fallback }
+            
+            do {
+                let prediction = try riskPredictor.predict(
+                    pm2_5: day.hourlyPM25[safe: hour] ?? 0,
+                    pm10: day.hourlyPM10[safe: hour] ?? 0,
+                    carbonMonoxide: day.hourlyCO[safe: hour] ?? 0,
+                    nitrogenDioxide: day.hourlyNO2[safe: hour] ?? 0,
+                    ozone: day.hourlyO3[safe: hour] ?? 0,
+                    temperature: day.hourlyTemperature[safe: hour] ?? 0,
+                    humidity: day.hourlyHumidity[safe: hour] ?? 0,
+                    windSpeed: day.hourlyWindSpeed[safe: hour] ?? 0,
+                    rain: day.hourlyRain[safe: hour] ?? 0
+                )
+                return prediction.riskLevel ?? fallback
+            } catch {
+                return fallback
+            }
+        }
+        
+        riskLevelCache[day.id] = levels
+        return levels
+    }
 }
 
 private extension Array {

@@ -5,7 +5,7 @@ struct WeekDayStrip: View {
 
     private var next4Days: [Date] {
         (0...3).compactMap {
-            Calendar.current.date(byAdding: .day, value: $0, to: viewModel.minSelectableDate)
+            Calendar.singapore.date(byAdding: .day, value: $0, to: viewModel.minSelectableDate)
         }
     }
 
@@ -28,7 +28,7 @@ struct WeekDayStrip: View {
 
             HStack(spacing: 30) {
                 ForEach(next4Days, id: \.self) { day in
-                    let isSelected = Calendar.current.isDate(day, inSameDayAs: viewModel.pickedDate)
+                    let isSelected = Calendar.singapore.isDate(day, inSameDayAs: viewModel.pickedDate)
                     Button {
                         withAnimation {
                             viewModel.pickedDate = day
