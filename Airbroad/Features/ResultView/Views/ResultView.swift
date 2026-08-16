@@ -1,4 +1,3 @@
-
 import SwiftUI
 import Charts
 
@@ -43,7 +42,7 @@ struct ResultView: View {
             } message: {
                 Text(viewModel.errorMessage ?? "")
             }
-            .navigationBarBackButtonHidden(true) 
+            .navigationBarBackButtonHidden(true)
         }
     }
     
@@ -60,7 +59,7 @@ struct ResultView: View {
             ForEach(viewModel.availableDates, id: \.self) { date in
                 DateChip(
                     date: date,
-                    isSelected: Calendar.current.isDate(date, inSameDayAs: viewModel.selectedDate)
+                    isSelected: Calendar.singapore.isDate(date, inSameDayAs: viewModel.selectedDate)
                 ) {
                     withAnimation(.snappy) { viewModel.select(date: date) }
                 }

@@ -25,11 +25,16 @@ struct SearchView: View {
             VStack {
                 Spacer()
                 bottomTimePanel
+                
+                //Temp
+                NavigationLink("Result") {
+                    ResultView(viewModel: resViewModel)
+                }
+                .buttonStyle(.glassProminent)
             }
             .padding(20)
             .padding(.top, 30)
             .padding(.bottom, 20)
-            
             
             topCluster
                 .padding(20)
@@ -101,7 +106,7 @@ struct SearchView: View {
     
     private var bottomTimePanel: some View {
         VStack (alignment: .leading) {
-            let date = Calendar.current.isDateInToday(viewModel.pickedDate)
+            let date = Calendar.singapore.isDateInToday(viewModel.pickedDate)
             ? "Today"
             : viewModel.pickedDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
             
@@ -133,7 +138,7 @@ struct SearchView: View {
                 tick: { value in
                     SliderTick(value) {
                         let displayed = Int(value) == 0 ? 12 : Int(value)
-                        let realHour24 = Calendar.current.component(.hour, from: Date())
+                        let realHour24 = Calendar.singapore.component(.hour, from: Date())
                         let realHour12 = realHour24 % 12
                         let realIsPM = realHour24 >= 12
                         if Int(value) == realHour12 && viewModel.isPM == realIsPM {

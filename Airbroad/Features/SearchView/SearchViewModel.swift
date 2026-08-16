@@ -20,23 +20,23 @@ final class SearchViewModel: NSObject, MKLocalSearchCompleterDelegate {
     var isEditing = false
 
     var minSelectableDate: Date {
-        Calendar.current.startOfDay(for: Date())
+        Calendar.singapore.startOfDay(for: Date())
     }
     var maxSelectableDate: Date {
-        Calendar.current.date(byAdding: .day, value: 3, to: minSelectableDate) ?? Date()
+        Calendar.singapore.date(byAdding: .day, value: 3, to: minSelectableDate) ?? Date()
     }
     
     // MARK: - Time picker
     // KONSEP: slider CUMA merepresentasikan posisi jam di angka 12-jam
     // (0 = "12", 1..11 = "1".."11") -- TIDAK menentukan AM/PM sama sekali.
     var sliderHour12: Double = {
-        let h24 = Calendar.current.component(.hour, from: Date())
+        let h24 = Calendar.singapore.component(.hour, from: Date())
         return Double(h24 % 12)
     }()
 
     // KONSEP: ini variabel TERPISAH, cuma diubah oleh SunMoonToggle --
     // tidak pernah dihitung ulang dari slider.
-    var isPM: Bool = Calendar.current.component(.hour, from: Date()) >= 12
+    var isPM: Bool = Calendar.singapore.component(.hour, from: Date()) >= 12
 
     // Nilai 24-jam sesungguhnya, digabung dari KEDUA variabel di atas.
     var actualHour24: Int {

@@ -81,7 +81,7 @@ class ResultViewModel {
         self.service = service
         self.riskPredictor = riskPredictor
         
-        let cal = Calendar.current
+        let cal = Calendar.singapore
         self.calendar = cal
         
         let components = calendar.dateComponents([.year, .month, .day], from: Date())
@@ -219,7 +219,7 @@ class ResultViewModel {
         days.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
     }
     
-    var selectedHourIndex: Int = Calendar.current.component(.hour, from: Date())
+    var selectedHourIndex: Int = Calendar.singapore.component(.hour, from: Date())
     
     private let singaporeLat = 1.35
     private let singaporeLon = 103.82

@@ -1,4 +1,3 @@
-
 import Foundation
 
 enum AirQualityServiceError: LocalizedError {
@@ -82,7 +81,7 @@ struct AirQualityService {
             URLQueryItem(name: "longitude", value: String(lon)),
             URLQueryItem(name: "start_date", value: dateFormatter.string(from: startDate)),
             URLQueryItem(name: "end_date", value: dateFormatter.string(from: endDate)),
-            URLQueryItem(name: "hourly", value: "temperature_2m, relative_humidity_2m, wind_speed_10m, rain"),
+            URLQueryItem(name: "hourly", value: "temperature_2m,relative_humidity_2m,wind_speed_10m,rain"),
             URLQueryItem(name: "timezone", value: timeZoneIdentifier)
         ]
 
@@ -133,7 +132,6 @@ struct AirQualityService {
             buckets[dayKey]?.o3.append(value(air.ozone, at: index))
             buckets[dayKey]?.co.append(value(air.carbon_monoxide, at: index))
             buckets[dayKey]?.no2.append(value(air.nitrogen_dioxide, at: index))
-            buckets[dayKey]?.o3.append(value(air.ozone, at: index))
             
             buckets[dayKey]?.temp.append(value(weather.temperature_2m, at: index))
             buckets[dayKey]?.humidity.append(value(weather.relative_humidity_2m, at: index))
