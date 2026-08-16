@@ -25,12 +25,6 @@ struct SearchView: View {
             VStack {
                 Spacer()
                 bottomTimePanel
-                
-                //Temp
-                NavigationLink("Result") {
-                    ResultView(viewModel: resViewModel)
-                }
-                .buttonStyle(.glassProminent)
             }
             .padding(20)
             .padding(.top, 30)

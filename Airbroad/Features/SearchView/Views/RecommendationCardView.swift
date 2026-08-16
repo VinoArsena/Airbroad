@@ -18,8 +18,8 @@ struct RecommendationCardView: View {
                         .fill(Color(.systemGray4))
                         .frame(width: 70, height: 70)
                         .overlay(
-                            Text("Mask\nImage")
-                                .font(.caption2)
+                            Image(systemName: "facemask")
+                                .font(.largeTitle)
                                 .multilineTextAlignment(.center)
                                 .foregroundStyle(Color(.systemGray))
                         )
