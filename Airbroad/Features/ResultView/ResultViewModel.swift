@@ -41,7 +41,7 @@ enum RiskLevel: Int, CaseIterable {
     var headline: String {
         switch self {
         case .safe: return "Air quality is great today"
-        case .slight: return "You might feet some discomfort"
+        case .slight: return "You might feel some discomfort"
         case .moderate: return "Take extra precaution"
         case .high: return "High risk, avoid going outside"
         }

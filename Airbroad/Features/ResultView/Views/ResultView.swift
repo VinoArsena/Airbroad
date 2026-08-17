@@ -269,13 +269,13 @@ struct ResultView: View {
     private var aboutBodyText: String {
         switch viewModel.selectedPollutant {
         case .aqi:
-            return "AQI (Air Quality Index) summarizes how clean or polluted the air is and what health effects might be a concern, on a single 0–500+ scale."
+            return "The Air Quality Index (AQI) is a standardized metric for evaluating air quality that quantifies various pollutants (PM2.5, PM10, O3, etc.) into a single indicator value. Higher values indicate more immediate and severe impacts on respiratory and cardiovascular health, often manifesting within hours or days."
         case .pm25:
-            return "PM2.5 refers to fine particles smaller than 2.5 micrometers — small enough to get deep into the lungs and bloodstream. They mainly come from vehicle exhaust, industry, and burning."
+            return "PM2.5 consists of fine particulate matter ≤2.5 micrometers. It is highly dangerous because it can penetrate the lung barrier and enter directly into the bloodstream, triggering systemic oxidative stress and acute cardiovascular diseases, including heart failure. Its main sources are combustion residues (such as vehicle emissions and wildfires)."
         case .pm10:
-            return "PM10 refers to coarser particles like dust, pollen, and mold spores. They're less likely to reach deep into the lungs than PM2.5, but can still irritate eyes, nose, and throat."
+            return "PM10 (inhalable particles ≤10 micrometers) is classified as coarse particulate matter, which includes road dust, pollen, and construction debris. PM10 is typically trapped in the upper respiratory tract, making it a primary cause of acute eye, nose, and throat irritation, and a major trigger for emergency hospital visits among asthma sufferers."
         case .o3:
-            return "Ground-level O3 (ozone) forms when pollutants react with sunlight. It tends to peak in the afternoon and can trigger coughing or shortness of breath, especially during exercise."
+            return "Ground-level (tropospheric) ozone is a secondary pollutant, unlike the natural stratospheric ozone that protects the earth. It is formed through chemical reactions between nitrogen oxides (NOx) from vehicles/industries and volatile organic compounds (VOCs) in the presence of sunlight. O3 is highly irritating; it inflames the airways, temporarily reduces lung function, and can trigger asthma attacks."
         }
     }
 }
