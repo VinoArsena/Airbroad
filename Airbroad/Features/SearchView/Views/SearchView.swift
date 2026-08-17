@@ -10,7 +10,7 @@ struct SearchView: View {
     var body: some View {
         ZStack (alignment: .top){
             
-            Image("background")
+            Image(viewModel.isPM ? "background2" : "background")
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture {
