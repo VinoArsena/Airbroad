@@ -34,6 +34,9 @@ struct SearchView: View {
                 .padding(20)
                 .padding(.top, 30)
         }
+        .safeAreaInset(edge: .bottom) {
+            
+        }
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .sheet(isPresented: $showDetailedPollutantSheet) {
             ResultView(viewModel: resViewModel)

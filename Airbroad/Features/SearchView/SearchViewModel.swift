@@ -20,8 +20,10 @@ final class SearchViewModel: NSObject, MKLocalSearchCompleterDelegate {
     var isEditing = false
 
     var minSelectableDate: Date {
-        Calendar.singapore.startOfDay(for: Date())
+        let components = Calendar.singapore.dateComponents([.year, .month, .day], from: Date())
+        return components.date ?? Date()
     }
+    
     var maxSelectableDate: Date {
         Calendar.singapore.date(byAdding: .day, value: 3, to: minSelectableDate) ?? Date()
     }
