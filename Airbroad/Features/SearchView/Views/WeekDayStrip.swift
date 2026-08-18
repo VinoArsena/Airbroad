@@ -1,33 +1,18 @@
 import SwiftUI
 
 struct WeekDayStrip: View {
+    @Environment(CalendarViewModel.self) var calViewModel
     @Bindable var viewModel: SearchViewModel
-
-    private var next4Days: [Date] {
-        (0...3).compactMap { 
-            Calendar.singapore.date(byAdding: .day, value: $0, to: viewModel.minSelectableDate)
-        }
-    }
-
+    
     var body: some View {
         VStack(spacing: 16) {
-//            HStack {
-                Text(viewModel.pickedDate.formatted(.dateTime.month(.wide).year()))
-                    .font(.headline)
-//                Spacer()
-//                Button {
-//                    viewModel.activePicker = .none
-//                } label: {
-//                    Image(systemName: "xmark.circle.fill")
-//                        .foregroundStyle(Color(.systemGray3))
-//                        .font(.title2)
-//                }
-//            }
+            Text(viewModel.pickedDate.formatted(.dateTime.month(.wide).year()))
+                .font(.headline)
             
             Divider()
-
+            
             HStack(spacing: 30) {
-                ForEach(next4Days, id: \.self) { day in
+                ForEach(calViewModel.next3Days, id: \.self) { (day: Date) in
                     let isSelected = Calendar.singapore.isDate(day, inSameDayAs: viewModel.pickedDate)
                     Button {
                         withAnimation {
@@ -37,10 +22,10 @@ struct WeekDayStrip: View {
                         }
                     } label: {
                         VStack(spacing: 6) {
-                            Text(day.formatted(.dateTime.weekday(.narrow)))
+                            Text(day.formatted(Date.FormatStyle(timeZone: .singapore).weekday(.narrow)))
                                 .font(.caption2)
                                 .foregroundStyle(Color(.systemGray))
-                            Text(day.formatted(.dateTime.day()))
+                            Text(day.formatted(Date.FormatStyle(timeZone: .singapore).day()))
                                 .font(.headline)
                                 .foregroundStyle(isSelected ? .white : .primary)
                                 .frame(width: 32, height: 32)
@@ -59,4 +44,5 @@ struct WeekDayStrip: View {
 
 #Preview {
     WeekDayStrip(viewModel: SearchViewModel())
+        .environment(CalendarViewModel())
 }
