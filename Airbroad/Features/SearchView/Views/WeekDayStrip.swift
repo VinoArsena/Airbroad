@@ -4,7 +4,7 @@ struct WeekDayStrip: View {
     @Bindable var viewModel: SearchViewModel
 
     private var next4Days: [Date] {
-        (0...3).compactMap {
+        (0...3).compactMap { 
             Calendar.singapore.date(byAdding: .day, value: $0, to: viewModel.minSelectableDate)
         }
     }
