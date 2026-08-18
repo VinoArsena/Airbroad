@@ -7,7 +7,7 @@ struct DateTimePickerButton: View {
     private var displayLabel: String {
         Calendar.singapore.isDateInToday(viewModel.pickedDate)
         ? "Today"
-        : viewModel.pickedDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+        : viewModel.pickedDate.formatted(Date.FormatStyle(timeZone: .singapore).weekday(.abbreviated).day().month(.abbreviated))
     }
     
     private var isShowingPicker: Binding<Bool> {

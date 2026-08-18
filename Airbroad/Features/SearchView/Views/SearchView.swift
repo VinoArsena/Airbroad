@@ -2,15 +2,15 @@ import SwiftUI
 import MapKit
 
 struct SearchView: View {
+    @Environment(CalendarViewModel.self) var calViewModel
     @Bindable var viewModel = SearchViewModel()
     @Bindable var resViewModel = ResultViewModel()
-    
     @State private var showDetailedPollutantSheet = false
     
     var body: some View {
         ZStack (alignment: .top){
             
-            Image(viewModel.isPM ? "background2" : "background")
+            Image(calViewModel.isPM ? "background2" : "background")
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -35,17 +35,19 @@ struct SearchView: View {
                 .padding(.top, 30)
         }
         .safeAreaInset(edge: .bottom) {
-            
         }
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onAppear{
+            resViewModel.calViewModel = calViewModel
+        }
         .sheet(isPresented: $showDetailedPollutantSheet) {
             ResultView(viewModel: resViewModel)
         }
-        .onChange(of: viewModel.actualHour24) { _, newHour in
-            resViewModel.selectedHourIndex = newHour
-        }
+//        .onChange(of: calViewModel.actualHour24) { _, newHour in
+//            calViewModel.actualHour24 = newHour
+//        }
         .task(id: viewModel.pickedDate) {
-            resViewModel.select(date: viewModel.pickedDate)
+            calViewModel.select(date: viewModel.pickedDate)
         }
         .task {
             await resViewModel.loadInitialLocation()
@@ -71,7 +73,7 @@ struct SearchView: View {
             
             if viewModel.showSearchBar {
                 SearchBarView(viewModel: viewModel)
-                    .padding(.top, 10)
+                    .padding(.top, 100)
                     .contentShape(Rectangle())
                     .onTapGesture {}
             }
@@ -102,10 +104,12 @@ struct SearchView: View {
     }
     
     private var bottomTimePanel: some View {
-        VStack (alignment: .leading) {
+        @Bindable var calViewModel = calViewModel
+        
+        return VStack (alignment: .leading) {
             let date = Calendar.singapore.isDateInToday(viewModel.pickedDate)
             ? "Today"
-            : viewModel.pickedDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+            : viewModel.pickedDate.formatted(Date.FormatStyle(timeZone: .singapore).weekday(.abbreviated).day().month(.abbreviated))
             
             HStack (alignment: .top){
                 VStack (alignment: .leading) {
@@ -120,15 +124,15 @@ struct SearchView: View {
                 Spacer()
                 
                 VStack (alignment: .trailing, spacing: 6){
-                    Text(  viewModel.currentTime12Hour).font(.title)
+                    Text(  calViewModel.currentTime12Hour).font(.title)
                         .fontWeight(.bold)
-                    SunMoonToggle(isPM: $viewModel.isPM)
+                    SunMoonToggle(isPM: $calViewModel.isPM)
                 }
                 
             }
             
             Slider(
-                value: $viewModel.sliderHour12,
+                value: $calViewModel.sliderHour12,
                 in: 0...11,
                 step: 1,
                 label: { Text("Time") },
@@ -138,7 +142,7 @@ struct SearchView: View {
                         let realHour24 = Calendar.singapore.component(.hour, from: Date())
                         let realHour12 = realHour24 % 12
                         let realIsPM = realHour24 >= 12
-                        if Int(value) == realHour12 && viewModel.isPM == realIsPM {
+                        if Int(value) == realHour12 && calViewModel.isPM == realIsPM {
                             Text("Now").font(.caption2).fontWeight(.semibold)
                         } else {
                             Text("\(displayed)").font(.caption2).foregroundStyle(.secondary)
@@ -155,4 +159,5 @@ struct SearchView: View {
 
 #Preview {
     SearchView()
+        .environment(CalendarViewModel())
 }
