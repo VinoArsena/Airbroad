@@ -11,9 +11,9 @@ struct SearchView: View {
         ZStack (alignment: .top){
             
             Image("background")
+                .resizable()
                 .frame(width: 402, height: 874)
                 .ignoresSafeArea()
-                .contentShape(Rectangle())
                 .onTapGesture {
                     guard viewModel.showSearchBar || viewModel.showCalendar else { return }
                     withAnimation {
