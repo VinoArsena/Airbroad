@@ -11,6 +11,7 @@ struct SearchView: View {
         ZStack (alignment: .top){
             
             Image("background")
+                .frame(width: 402, height: 874)
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -21,6 +22,14 @@ struct SearchView: View {
                         viewModel.activePicker = .none
                     }
                 }
+            
+            Color(.systemGray)
+                .opacity(resViewModel.pollutantOpacity)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .animation(.easeInOut)
+            
+            ParticleOverlayView(resViewModel: resViewModel)
             
             VStack {
                 Spacer()
@@ -95,6 +104,7 @@ struct SearchView: View {
                             level: level,
                             nextBetterTime: resViewModel.nextBetterTime
                         )
+                        .glassEffect(.regular.tint(Color(.clear)), in: .rect(cornerRadius: 16))
                         .padding(.top, 16)
                     }
                     .buttonStyle(.plain)

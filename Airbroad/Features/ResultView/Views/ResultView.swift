@@ -199,6 +199,8 @@ struct ResultView: View {
                 .padding(.horizontal, 10)
         }
         
+        
+        
     }
 }
 

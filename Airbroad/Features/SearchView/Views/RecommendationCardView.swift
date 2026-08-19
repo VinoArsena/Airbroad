@@ -26,11 +26,11 @@ struct RecommendationCardView: View {
                                 .fontWeight(.bold)
                             Text(level.recommendation)
                                 .font(.caption)
-                                .foregroundStyle(Color(.systemGray))
+//                                .foregroundStyle(Color(.systemGray))
                         if let better = nextBetterTime {
                             Text("Better condition expected around \(better).")
                                 .font(.caption2)
-                                .foregroundStyle(Color(.systemGray))
+//                                .foregroundStyle(Color(.systemGray))
                         }
                     }
                     .multilineTextAlignment(.leading)
@@ -56,9 +56,8 @@ struct RecommendationCardView: View {
             
             }
         }
-        
-        .background(Color(.systemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(Color(.clear))
+        .contentShape(RoundedRectangle(cornerRadius: 16))
     }
     
     @ViewBuilder

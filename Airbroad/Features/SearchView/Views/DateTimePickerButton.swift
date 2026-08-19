@@ -35,7 +35,6 @@ struct DateTimePickerButton: View {
                 Image(systemName: "calendar")
                 Text(displayLabel).font(.headline)
                     .foregroundStyle(foregroundColor)
-                //                Image(systemName: viewModel.activePicker == .date ? "chevron.up" : "chevron.down")
             }
             .padding(.horizontal, 14)
             .frame(height: 44)
