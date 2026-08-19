@@ -20,7 +20,7 @@ struct RecommendationCardView: View {
                         .padding(.leading, 10)
                         .padding(.trailing, 15)
                     
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 5) {
                             Text(level.headline)
                                 .font(.title2)
                                 .fontWeight(.bold)
@@ -34,7 +34,7 @@ struct RecommendationCardView: View {
                         }
                     }
                     .multilineTextAlignment(.leading)
-                    .frame(maxHeight: 125)
+//                    .frame(maxHeight: 135)
                     .padding(.trailing, 10)
                 }
                 .padding()
@@ -52,7 +52,7 @@ struct RecommendationCardView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.trailing, 10)
                 }
-                .padding(.vertical)
+                .padding(.vertical, 10)
             
             }
         }
