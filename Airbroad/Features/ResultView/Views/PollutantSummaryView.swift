@@ -29,7 +29,7 @@ struct PollutantSummaryView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
+            .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
         }
     }
     
@@ -50,7 +50,7 @@ struct PollutantSummaryView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
+            .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
         }
     }
 }

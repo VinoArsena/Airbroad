@@ -33,7 +33,7 @@ struct LocationSearchButton: View {
             }
             .padding(.horizontal, 14)
             .frame(height: 44)
-            .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: Capsule())
+            .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: Capsule())
         }
         .disabled(viewModel.activePicker == .date)
         .opacity(viewModel.activePicker == .date ? 0.4 : 1)

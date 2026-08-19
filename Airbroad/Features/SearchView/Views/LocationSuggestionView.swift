@@ -46,7 +46,7 @@ struct LocationSuggestionView: View {
             .padding(.vertical, 10)
             .padding(.horizontal, 40)
             .contentShape(Rectangle())
-            .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
+            .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
         }
         .buttonStyle(.plain)
     }

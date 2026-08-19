@@ -81,7 +81,7 @@ enum RiskLevel: Int, CaseIterable {
         case .safe: return "Enjoy your time outdoors."
         case .slight: return "You are suggested to wear and bring your mask."
         case .moderate: return "Limit outdoor activity and keep your inhaler nearby."
-        case .high: return "Stay indoors as much as possible. Keep rescue medication accessible."
+        case .high: return "Stay indoors! Keep rescue medication accessible."
         }
     }
     
@@ -229,6 +229,43 @@ class ResultViewModel {
         }
     }
         
+    var todayDay: AirQualityDay? {
+        days.first(where: { Calendar.singapore.isDateInToday($0.date) }) ?? days.first
+    }
+
+    var todayResults: [RiskDisplayItem] {
+        guard let day = todayDay else { return [] }
+        let aqiValues = day.hourlyAQI
+        let pm25Values = day.hourlyPM25
+        let pm10Values = day.hourlyPM10
+        let o3Values = day.hourlyO3
+        let riskLevels = mlRiskLevels(for: day)
+        
+        return (0..<aqiValues.count).map { hour in
+            let category = PollutantType.aqi.category(for: aqiValues[hour])
+            return RiskDisplayItem(
+                time: String(format: "%02d:00", hour),
+                category: category,
+                riskLevel: riskLevels[safe: hour] ?? RiskLevel(fromCategory: category),
+                point: PollutantSnapshot(
+                    aqi: aqiValues[safe: hour] ?? 0,
+                    pm2_5: pm25Values[safe: hour] ?? 0,
+                    pm10: pm10Values[safe: hour] ?? 0,
+                    ozone: o3Values[safe: hour] ?? 0
+                )
+            )
+        }
+    }
+
+    var todayCurrentHourData: RiskDisplayItem? {
+        guard !todayResults.isEmpty else { return nil }
+        let index = Swift.min(Swift.max(calViewModel.actualHour24, 0), todayResults.count - 1)
+        return todayResults[safe: index]
+    }
+
+    var todayCurrentRiskLevel: RiskLevel? {
+        todayCurrentHourData?.riskLevel
+    }
     
     var chartValues: [Double] {
         guard let day = selectedDay else { return [] }

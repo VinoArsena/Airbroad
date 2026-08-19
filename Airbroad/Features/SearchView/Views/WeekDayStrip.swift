@@ -38,7 +38,7 @@ struct WeekDayStrip: View {
             }
         }
         .padding()
-        .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
+        .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
     }
 }
 

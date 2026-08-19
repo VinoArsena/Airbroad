@@ -24,19 +24,19 @@ struct SearchView: View {
                         //                        .padding(.top, 40)
                         
                         if !resViewModel.isLoading {
-                            if let current = resViewModel.currentHourData,
-                               let level = resViewModel.currentRiskLevel {
+                            if let current = resViewModel.todayCurrentHourData,
+                               let level = resViewModel.todayCurrentRiskLevel {
                                 GuideCardView(
                                     srcViewModel: viewModel,
                                     resViewModel: resViewModel,
                                     current: current,
                                     level: level
                                 )
-                                .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 16))
+                                .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 16))
                                 .padding(.top, 20)
                                 .padding(.bottom, 20)
                                 
-                                QualityPlotView(srcViewModel: viewModel, resViewModel: resViewModel)
+                                QualityPlotView(srcViewModel: viewModel, resViewModel: resViewModel, displayLabel: displayLabel)
                                     .padding(.bottom, 20)
                                 
                                 PollutantDetailView(viewModel: resViewModel)
@@ -51,6 +51,7 @@ struct SearchView: View {
                                     .font(.title3)
                                     .fontWeight(.bold)
                             }
+                            .foregroundStyle(Color.primary)
                             .padding(.top, 350)
                         }
                         

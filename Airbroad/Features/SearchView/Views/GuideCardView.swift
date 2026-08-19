@@ -10,8 +10,11 @@ struct GuideCardView: View {
     var body: some View {
         
         VStack(alignment: .leading) {
-            Text((hasSelectedLocation && srcViewModel.locationSearch != "") ? srcViewModel.locationSearch : "Singapore")
-                .font(.largeTitle)
+            HStack {
+                Image(systemName: "location.fill")
+                Text((hasSelectedLocation && srcViewModel.locationSearch != "") ? srcViewModel.locationSearch : "Singapore")
+            }
+                .font(.title)
                 .fontWeight(.bold)
             
             Divider()
@@ -27,7 +30,7 @@ struct GuideCardView: View {
                         .font(.subheadline)
                     
                     Text(level.recommendation)
-                        .font(.title3)
+                        .font(.body)
                         .fontWeight(.bold)
                     //                                .foregroundStyle(Color(.systemGray))
                     

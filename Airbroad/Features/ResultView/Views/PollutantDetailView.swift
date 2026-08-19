@@ -10,14 +10,14 @@ struct PollutantDetailView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Details")
-                .font(.title)
+                .font(.title3)
                 .fontWeight(.bold)
             
             pollutantPicker
             aqiCard
         }
         .padding()
-        .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
+        .glassEffect(.clear.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
         .overlay {
             if viewModel.isLoading && viewModel.days.isEmpty {
                 ProgressView()
@@ -38,7 +38,7 @@ struct PollutantDetailView: View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(alignment: .firstTextBaseline) {
                 Text(currentValueText)
-                    .font(.largeTitle)
+                    .font(.title3)
                     .fontWeight(.bold)
                 
                 Spacer()
