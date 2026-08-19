@@ -27,7 +27,7 @@ enum RiskLevel: Int, CaseIterable {
         case .veryHigh, .extreme: self = .high
         }
     }
-
+    
     init?(mlLabel: String) {
         switch mlLabel {
         case "Safe": self = .safe
@@ -41,7 +41,7 @@ enum RiskLevel: Int, CaseIterable {
     var headline: String {
         switch self {
         case .safe: return "Air quality is great today"
-        case .slight: return "You might feet some discomfort"
+        case .slight: return "You might feel some discomfort"
         case .moderate: return "Take extra precaution"
         case .high: return "High risk, avoid going outside"
         }
@@ -68,34 +68,39 @@ class ResultViewModel {
         let lowestUpcomingHour: Int
     }
     
-    var selectedDate: Date
+    var calViewModel: CalendarViewModel
     var selectedPollutant: PollutantType = .aqi
     var days: [AirQualityDay] = []
     var isLoading = false
     var errorMessage: String?
     
+    // Synced/driven by CalendarViewModel
+//    var selectedDate: Date = Calendar.singapore.startOfDay(for: Date())
+//    var selectedHourIndex: Int = Calendar.singapore.component(.hour, from: Date())
+    
+    private let service: AirQualityService
+    private let riskPredictor: RiskPredicting?
+    private var riskLevelCache: [String: [RiskLevel]] = [:]
+    
+    private let singaporeLat = 1.35
+    private let singaporeLon = 103.82
+    
     init(
+        calViewModel: CalendarViewModel = CalendarViewModel(),
         service: AirQualityService = AirQualityService(),
         riskPredictor: RiskPredicting? = try? CoreMLRiskPredictor()
     ) {
         self.service = service
         self.riskPredictor = riskPredictor
-        
-        let cal = Calendar.singapore
-        self.calendar = cal
-        
-        let components = calendar.dateComponents([.year, .month, .day], from: Date())
-        let today = cal.date(from: components) ?? cal.startOfDay(for: Date())
-        self.selectedDate = today
+        self.calViewModel = calViewModel
     }
     
-    var availableDates: [Date] {
-        let today = startOfTodayInTargetTimeZone
-        return (0...forecastDaysAhead).compactMap { dayOffset in
-            calendar.date(byAdding: .day, value: dayOffset, to: today)
-        }
+    // MARK: - Selected Day
+    var selectedDay: AirQualityDay? {
+        days.first { Calendar.singapore.isDate($0.date, inSameDayAs: calViewModel.selectedDate) }
     }
     
+    // MARK: - Restored Computed Properties
     var selectedStats: Stats? {
         guard let day = selectedDay else { return nil }
         return stats(for: hourlyValues(for: day, pollutant: selectedPollutant))
@@ -133,36 +138,26 @@ class ResultViewModel {
         let pm25Values = day.hourlyPM25
         let pm10Values = day.hourlyPM10
         let o3Values = day.hourlyO3
-        
-        let startIndex = Swift.min(selectedHourIndex, aqiValues.count - 1)
-        
-        guard startIndex >= 0, startIndex < aqiValues.count else { return [] }
-        
         let riskLevels = mlRiskLevels(for: day)
         
-        var items: [RiskDisplayItem] = []
-        items.reserveCapacity(aqiValues.count)
-        
-        for hour in 0..<aqiValues.count {
+        return (0..<aqiValues.count).map { hour in
             let category = PollutantType.aqi.category(for: aqiValues[hour])
-            let item = RiskDisplayItem(
-                time: timeLabel(forHour: hour),
+            return RiskDisplayItem(
+                time: String(format: "%02d:00", hour),
                 category: category,
                 riskLevel: riskLevels[safe: hour] ?? RiskLevel(fromCategory: category),
                 point: PollutantSnapshot(
                     aqi: aqiValues[safe: hour] ?? 0,
                     pm2_5: pm25Values[safe: hour] ?? 0,
                     pm10: pm10Values[safe: hour] ?? 0,
-                    ozone: o3Values[safe: hour] ?? 0)
+                    ozone: o3Values[safe: hour] ?? 0
+                )
             )
-            items.append(item)
         }
-        
-        return items
     }
     
     var currentHourData: RiskDisplayItem? {
-        let index = Swift.min(Swift.max(selectedHourIndex, 0), results.count - 1)
+        let index = Swift.min(Swift.max(calViewModel.actualHour24, 0), results.count - 1)
         return results[safe: index]
     }
     
@@ -171,20 +166,90 @@ class ResultViewModel {
     }
     
     var nextBetterTime: String? {
-        guard calendar.isDateInToday(selectedDate) else { return nil }
+        guard Calendar.singapore.isDateInToday(calViewModel.selectedDate) else { return nil }
         guard let current = currentRiskLevel else { return nil }
         
-        let startIndex = Swift.min(Swift.max(selectedHourIndex, 0), results.count - 1)
-        let upcoming = results[(startIndex + 1)...]   // only look forward from selected hour, not from hour 0
+        let startIndex = Swift.min(Swift.max(calViewModel.actualHour24, 0), results.count - 1)
+        guard startIndex + 1 < results.count else { return nil }
         
-        for item in upcoming {
-            if item.riskLevel.rawValue < current.rawValue {
-                return item.time
-            }
-        }
-        return nil
+        let upcoming = results[(startIndex + 1)...]
+        return upcoming.first { $0.riskLevel.rawValue < current.rawValue }?.time
     }
     
+    var dailySummaryText: String {
+        guard let stats = selectedStats, let category = currentCategory else {
+                return ""
+            }
+        
+        let comparisonWord = stats.percentVsAverage >= 0 ? "higher" : "lower"
+        let percentText = String(format: "%.0f", abs(stats.percentVsAverage))
+        let lowestHourText = String(format: "%02d:00", stats.lowestUpcomingHour)
+        
+        func formatted(_ value: Double) -> String {
+            let unit = selectedPollutant.unit
+            let number = selectedPollutant == .aqi
+            ? String(Int(value.rounded()))
+            : String(format: "%.1f", value)
+            return unit.isEmpty ? number : "\(number) \(unit)"
+        }
+        
+        switch selectedPollutant {
+        case .aqi:
+            let advice = category.recommendsStayingIndoors
+            ? "not to go out or do outdoor activity"
+            : "it's a good time for outdoor activity"
+            return """
+            Current AQI is \(formatted(stats.current)), you are suggested \(advice).
+            Lower AQI expected to be around \(lowestHourText).
+            Today's AQI range is from \(formatted(stats.min)) to \(formatted(stats.max)), it will be \(percentText)% \(comparisonWord) than daily average.
+            """
+            
+        case .pm25:
+            let advice = category.recommendsStayingIndoors
+            ? "sensitive groups should limit prolonged outdoor exertion"
+            : "fine particle levels are within a comfortable range"
+            return """
+            Current PM2.5 is \(formatted(stats.current)), \(advice).
+            Cleanest air is expected around \(lowestHourText).
+            Today's PM2.5 range is \(formatted(stats.min))–\(formatted(stats.max)), running \(percentText)% \(comparisonWord) than the daily average.
+            """
+            
+        case .pm10:
+            let advice = category.recommendsStayingIndoors
+            ? "consider keeping windows closed if you're sensitive to dust and pollen"
+            : "coarse particle levels look manageable today"
+            return """
+            Current PM10 is \(formatted(stats.current)), \(advice).
+            Levels are expected to ease around \(lowestHourText).
+            Today's PM10 range is \(formatted(stats.min))–\(formatted(stats.max)), which is \(percentText)% \(comparisonWord) than the daily average.
+            """
+            
+        case .o3:
+            let advice = category.recommendsStayingIndoors
+            ? "ground-level ozone is elevated, so heavy outdoor exercise is best postponed"
+            : "ozone levels are staying comfortably low"
+            return """
+            Current O3 is \(formatted(stats.current)), \(advice).
+            Ozone is expected to be lowest around \(lowestHourText).
+            Today's O3 range is \(formatted(stats.min))–\(formatted(stats.max)), tracking \(percentText)% \(comparisonWord) than the daily average.
+            """
+        }
+    }
+    
+    var aboutBodyText: String {
+        switch selectedPollutant {
+        case .aqi:
+            return "The Air Quality Index (AQI) is a standardized metric for evaluating air quality that quantifies various pollutants (PM2.5, PM10, O3, etc.) into a single indicator value. Higher values indicate more immediate and severe impacts on respiratory and cardiovascular health, often manifesting within hours or days."
+        case .pm25:
+            return "PM2.5 consists of fine particulate matter ≤2.5 micrometers. It is highly dangerous because it can penetrate the lung barrier and enter directly into the bloodstream, triggering systemic oxidative stress and acute cardiovascular diseases, including heart failure. Its main sources are combustion residues (such as vehicle emissions and wildfires)."
+        case .pm10:
+            return "PM10 (inhalable particles ≤10 micrometers) is classified as coarse particulate matter, which includes road dust, pollen, and construction debris. PM10 is typically trapped in the upper respiratory tract, making it a primary cause of acute eye, nose, and throat irritation, and a major trigger for emergency hospital visits among asthma sufferers."
+        case .o3:
+            return "Ground-level (tropospheric) ozone is a secondary pollutant, unlike the natural stratospheric ozone that protects the earth. It is formed through chemical reactions between nitrogen oxides (NOx) from vehicles/industries and volatile organic compounds (VOCs) in the presence of sunlight. O3 is highly irritating; it inflames the airways, temporarily reduces lung function, and can trigger asthma attacks."
+        }
+    }
+    
+    // MARK: - Networking
     func loadInitialLocation() async {
         await self.loadForecast(lat: singaporeLat, lon: singaporeLon)
     }
@@ -194,8 +259,8 @@ class ResultViewModel {
         errorMessage = nil
         defer { isLoading = false }
         
-        let today = startOfTodayInTargetTimeZone
-        guard let endDate = calendar.date(byAdding: .day, value: forecastDaysAhead + 1, to: today) else { return }
+        let today = calViewModel.today
+        guard let endDate = Calendar.singapore.date(byAdding: .day, value: calViewModel.forecastDaysAhead + 1, to: today) else { return }
         
         do {
             days = try await service.fetchForecast(startDate: today, endDate: endDate, lat: lat, lon: lon)
@@ -206,44 +271,14 @@ class ResultViewModel {
         }
     }
     
-    func isSelectable(_ date: Date) -> Bool {
-        availableDates.contains { calendar.isDate($0, inSameDayAs: date) }
-    }
-    
-    func select(date: Date) {
-        guard isSelectable(date) else { return }
-        selectedDate = calendar.startOfDay(for: date)
-    }
-    
-    var selectedDay: AirQualityDay? {
-        days.first { calendar.isDate($0.date, inSameDayAs: selectedDate) }
-    }
-    
-    var selectedHourIndex: Int = Calendar.singapore.component(.hour, from: Date())
-    
-    private let singaporeLat = 1.35
-    private let singaporeLon = 103.82
-    
-    private let service: AirQualityService
-    private let calendar: Calendar
-    private let riskPredictor: RiskPredicting?
-    
-    private var riskLevelCache: [String: [RiskLevel]] = [:]
-    
-    private let forecastDaysAhead = 3
-    
-    private var startOfTodayInTargetTimeZone: Date {
-        let components = calendar.dateComponents([.year, .month, .day], from: Date())
-        return calendar.date(from: components) ?? calendar.startOfDay(for: Date())
-    }
-    
+    // MARK: - Private Helpers
     private func stats(for values: [Double]) -> Stats? {
         guard !values.isEmpty,
               let minValue = values.min(),
               let maxValue = values.max() else { return nil }
         
         let average = values.reduce(0, +) / Double(values.count)
-        let clampedIndex = Swift.min(values.count - 1, Swift.max(0, selectedHourIndex))
+        let clampedIndex = Swift.min(values.count - 1, Swift.max(0, calViewModel.actualHour24))
         let current = values[clampedIndex]
         let percent = average == 0 ? 0 : ((current - average) / average) * 100
         
@@ -268,10 +303,6 @@ class ResultViewModel {
         case .pm10: return day.hourlyPM10
         case .o3:   return day.hourlyO3
         }
-    }
-    
-    private func timeLabel(forHour hour: Int) -> String {
-        String(format: "%02d:00", hour)
     }
     
     private func mlRiskLevels(for day: AirQualityDay) -> [RiskLevel] {
@@ -307,7 +338,6 @@ class ResultViewModel {
         return levels
     }
 }
-
 private extension Array {
     subscript(safe index: Int) -> Element? {
         indices.contains(index) ? self[index] : nil

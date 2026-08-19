@@ -29,14 +29,10 @@ struct DateChip: View {
     }
     
     private var weekdayLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "E"
-        return String(formatter.string(from: date).prefix(1))
+        String(DateFormatter.sgWeekday.string(from: date).prefix(1))
     }
     
     private var dayLabel: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        return formatter.string(from: date)
+        DateFormatter.sgDay.string(from: date)
     }
 }
