@@ -49,6 +49,15 @@ enum RiskLevel: Int, CaseIterable {
         }
     }
     
+    var level: String {
+        switch self {
+        case .safe: return "Safe"
+        case .slight: return "Slight"
+        case .moderate: return "Moderate"
+        case .high: return "High"
+        }
+    }
+    
     var maskImage: String {
         switch self {
         case .safe: return "safe"
@@ -73,6 +82,24 @@ enum RiskLevel: Int, CaseIterable {
         case .slight: return "You are suggested to wear and bring your mask."
         case .moderate: return "Limit outdoor activity and keep your inhaler nearby."
         case .high: return "Stay indoors as much as possible. Keep rescue medication accessible."
+        }
+    }
+    
+    var label: String {
+        switch self {
+        case .safe: return "Safe"
+        case .slight: return "Slight"
+        case .moderate: return "Moderate"
+        case .high: return "High"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .safe: return .green
+        case .slight: return .yellow
+        case .moderate: return .orange
+        case .high: return .red
         }
     }
     
@@ -162,7 +189,8 @@ class ResultViewModel {
     
     // MARK: - Selected Day
     var selectedDay: AirQualityDay? {
-        days.first { Calendar.singapore.isDate($0.date, inSameDayAs: calViewModel.selectedDate) }
+        days.first(where: { Calendar.singapore.isDate($0.date, inSameDayAs: calViewModel.selectedDate) })
+            ?? days.first
     }
     
     // MARK: - Restored Computed Properties
@@ -190,6 +218,17 @@ class ResultViewModel {
         guard let value = selectedStats?.current else { return nil }
         return selectedPollutant.category(for: value)
     }
+    
+    var textColor: Color {
+        guard let cat = currentCategory else { return .primary }
+        switch cat {
+            case .low: return .green
+            case .moderate: return .yellow
+            case .high: return .orange
+            case .veryHigh, .extreme: return .red
+        }
+    }
+        
     
     var chartValues: [Double] {
         guard let day = selectedDay else { return [] }

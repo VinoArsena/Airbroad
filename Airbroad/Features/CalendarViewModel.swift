@@ -46,6 +46,7 @@ class CalendarViewModel {
         }
     }
     
+    
     // MARK: - Computed Time Properties
     var actualHour24: Int {
         let displayedHour12 = Int(sliderHour12) == 0 ? 12 : Int(sliderHour12)

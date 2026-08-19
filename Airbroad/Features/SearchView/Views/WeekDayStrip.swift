@@ -11,7 +11,7 @@ struct WeekDayStrip: View {
             
             Divider()
             
-            HStack(spacing: 30) {
+            HStack(spacing: 60) {
                 ForEach(calViewModel.next3Days, id: \.self) { (day: Date) in
                     let isSelected = Calendar.singapore.isDate(day, inSameDayAs: viewModel.pickedDate)
                     Button {

@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "light.png",
+      "filename" : "App Icon Template.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "dark.png",
+      "filename" : "App Icon Template 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,6 +25,7 @@
           "value" : "tinted"
         }
       ],
+      "filename" : "App Icon Template 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"

@@ -45,11 +45,10 @@ struct LocationSuggestionView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 10)
             .padding(.horizontal, 40)
-            .background(Color(.secondarySystemGroupedBackground))
+            .contentShape(Rectangle())
+            .glassEffect(.regular.tint(Color(.systemGroupedBackground)), in: .rect(cornerRadius: 20))
         }
         .buttonStyle(.plain)
-        .cornerRadius(20)
-        
     }
     
     private func selectDestination() {
