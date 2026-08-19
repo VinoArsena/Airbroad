@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftUI
 
 struct PollutantSnapshot {
     let aqi: Double
@@ -14,6 +15,16 @@ struct RiskDisplayItem: Identifiable {
     let category: AQICategory
     let riskLevel: RiskLevel
     let point: PollutantSnapshot
+}
+
+struct AirParticle: Identifiable {
+    let id = UUID()
+    var x: Double
+    var y: Double
+    let size: Double
+    let speed: Double
+    let driftFactor: Double
+    let opacity: Double
 }
 
 enum RiskLevel: Int, CaseIterable {
@@ -64,6 +75,51 @@ enum RiskLevel: Int, CaseIterable {
         case .high: return "Stay indoors as much as possible. Keep rescue medication accessible."
         }
     }
+    
+    var pollutantOpacity: Double {
+        switch self {
+        case .safe: return 0
+        case .slight: return 0.15
+        case .moderate: return 0.3
+        case .high: return 0.6
+        }
+    }
+    
+    var particleCount: Int {
+        switch self {
+        case .safe: return 0
+        case .slight: return 20
+        case .moderate: return 80
+        case .high: return 160
+        }
+    }
+    
+    var particleSpeedRange: ClosedRange<Double> {
+        switch self {
+        case .safe:     return 0...0
+        case .slight:   return 10.0...25.0
+        case .moderate: return 20.0...45.0
+        case .high:     return 35.0...70.0
+        }
+    }
+    
+    var particleSizeRange: ClosedRange<Double> {
+        switch self {
+        case .safe:     return 0...0
+        case .slight:   return 1.5...3.0
+        case .moderate: return 2.0...4.5
+        case .high:     return 2.5...6.0
+        }
+    }
+    
+    var particleColor: Color {
+        switch self {
+        case .safe:     return .clear
+        case .slight:   return Color.white.opacity(0.5)
+        case .moderate: return .black.opacity(0.4)
+        case .high:     return .black.opacity(0.6)
+        }
+    }
 }
 
 @Observable
@@ -84,8 +140,8 @@ class ResultViewModel {
     var errorMessage: String?
     
     // Synced/driven by CalendarViewModel
-//    var selectedDate: Date = Calendar.singapore.startOfDay(for: Date())
-//    var selectedHourIndex: Int = Calendar.singapore.component(.hour, from: Date())
+    //    var selectedDate: Date = Calendar.singapore.startOfDay(for: Date())
+    //    var selectedHourIndex: Int = Calendar.singapore.component(.hour, from: Date())
     
     private let service: AirQualityService
     private let riskPredictor: RiskPredicting?
@@ -174,6 +230,23 @@ class ResultViewModel {
         currentHourData?.riskLevel
     }
     
+    var pollutantOpacity: Double {
+        currentRiskLevel?.pollutantOpacity ?? 0
+    }
+    
+    var particleCount: Int {
+        currentRiskLevel?.particleCount ?? 0
+    }
+    
+    var particleColor: Color {
+        currentRiskLevel?.particleColor ?? .clear
+    }
+    
+    var shouldShowParticles: Bool {
+        guard let level = currentRiskLevel else { return false }
+        return level != .safe && level.particleCount > 0
+    }
+    
     var nextBetterTime: String? {
         guard Calendar.singapore.isDateInToday(calViewModel.selectedDate) else { return nil }
         guard let current = currentRiskLevel else { return nil }
@@ -187,8 +260,8 @@ class ResultViewModel {
     
     var dailySummaryText: String {
         guard let stats = selectedStats, let category = currentCategory else {
-                return ""
-            }
+            return ""
+        }
         
         let comparisonWord = stats.percentVsAverage >= 0 ? "higher" : "lower"
         let percentText = String(format: "%.0f", abs(stats.percentVsAverage))
@@ -277,6 +350,25 @@ class ResultViewModel {
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription
             ?? "Couldn't load air quality data. Pull to refresh and try again."
+        }
+    }
+    
+    
+    
+    func generateParticles(in size: CGSize) -> [AirParticle] {
+        guard let level = currentRiskLevel, level != .safe, level.particleCount > 0 else {
+            return []
+        }
+        
+        return (0..<level.particleCount).map { _ in
+            AirParticle(
+                x: Double.random(in: 0...Double(size.width)),
+                y: Double.random(in: 0...Double(size.height)),
+                size: Double.random(in: level.particleSizeRange),
+                speed: Double.random(in: level.particleSpeedRange),
+                driftFactor: Double.random(in: 0...(2 * Double.pi)),
+                opacity: Double.random(in: 0.3...0.85)
+            )
         }
     }
     
