@@ -11,7 +11,7 @@ struct SunMoonToggle: View {
         } label: {
             ZStack(alignment: isPM ? .trailing : .leading) {
                 Capsule()
-                    .fill(isPM ? Color(.tertiarySystemGroupedBackground) : Color(.blue.opacity(0.8)))
+                    .fill(isPM ? Color(.lightGray) : Color(.blue.opacity(0.8)))
                     .frame(width: 50, height: 30)
                     .glassEffect()
 

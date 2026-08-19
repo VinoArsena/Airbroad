@@ -10,7 +10,7 @@ struct SearchView: View {
     var body: some View {
         ZStack (alignment: .top){
             
-            Image(calViewModel.isPM ? "background2" : "background")
+            Image("background")
                 .ignoresSafeArea()
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -114,7 +114,7 @@ struct SearchView: View {
             HStack (alignment: .top){
                 VStack (alignment: .leading) {
                     Text(viewModel.selectedDestination?.title ?? "Singapore")
-                        .font(.title)
+                        .font(.title3)
                         .fontWeight(.bold)
                     Text(date)
                         .font(.body)
@@ -124,7 +124,7 @@ struct SearchView: View {
                 Spacer()
                 
                 VStack (alignment: .trailing, spacing: 6){
-                    Text(  calViewModel.currentTime12Hour).font(.title)
+                    Text(  calViewModel.currentTime12Hour).font(.title3)
                         .fontWeight(.bold)
                     SunMoonToggle(isPM: $calViewModel.isPM)
                 }
