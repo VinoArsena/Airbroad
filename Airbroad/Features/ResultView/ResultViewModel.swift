@@ -38,6 +38,15 @@ enum RiskLevel: Int, CaseIterable {
         }
     }
     
+    var maskImage: String {
+        switch self {
+        case .safe: return "safe"
+        case .slight: return "slight"
+        case .moderate: return "moderate"
+        case .high: return "high"
+        }
+    }
+    
     var headline: String {
         switch self {
         case .safe: return "Air quality is great today"

@@ -14,30 +14,28 @@ struct RecommendationCardView: View {
                 Text("Fetching AQI Data")
             } else {
                 HStack(alignment: .center, spacing: 16) {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemGray4))
-                        .frame(width: 70, height: 70)
-                        .overlay(
-                            Image(systemName: "facemask")
-                                .font(.largeTitle)
-                                .multilineTextAlignment(.center)
-                                .foregroundStyle(Color(.systemGray))
-                        )
-                        .padding(.trailing, 5)
+                    Image(level.maskImage)
+                        .resizable()
+                        .frame(maxWidth: 70, maxHeight: 70)
+                        .padding(.leading, 10)
+                        .padding(.trailing, 15)
                     
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(level.headline)
-                            .font(.headline)
-                            .fontWeight(.bold)
-                        Text(level.recommendation)
-                            .font(.caption)
-                            .foregroundStyle(Color(.systemGray))
+                    VStack(alignment: .leading, spacing: 10) {
+                            Text(level.headline)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            Text(level.recommendation)
+                                .font(.caption)
+                                .foregroundStyle(Color(.systemGray))
                         if let better = nextBetterTime {
                             Text("Better condition expected around \(better).")
                                 .font(.caption2)
                                 .foregroundStyle(Color(.systemGray))
                         }
                     }
+                    .multilineTextAlignment(.leading)
+                    .frame(maxHeight: 125)
+                    .padding(.trailing, 10)
                 }
                 .padding()
                 
@@ -58,6 +56,7 @@ struct RecommendationCardView: View {
             
             }
         }
+        
         .background(Color(.systemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
